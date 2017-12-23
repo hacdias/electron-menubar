@@ -163,7 +163,7 @@ class Menubar extends EventEmitter {
     if (!this.window) {
       this._createWindow()
     }
-    
+
     this.emit('show')
 
     if (!this.cachedBounds) {
