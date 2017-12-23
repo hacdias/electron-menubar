@@ -75,7 +75,7 @@ module.exports = class Menubar extends EventEmitter {
     this.showWindow(this.cachedBounds)
   }
 
-  createWindow () {
+  _createWindow () {
     this.emit('create-window')
 
     this.window = new BrowserWindow(this.opts.window)
@@ -122,7 +122,7 @@ module.exports = class Menubar extends EventEmitter {
   showWindow (trayPos) {
     if (this.supportsTrayHighlightState) this.tray.setHighlightMode('always')
     if (!this.window) {
-      this.createWindow()
+      this._createWindow()
     }
 
     this.emit('show')
