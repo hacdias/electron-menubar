@@ -150,6 +150,7 @@ class Menubar extends EventEmitter {
     if (!this.window) return
     this.emit('hide')
     this.window.hide()
+    this.emit('after-hide')
   }
 
   /**
@@ -162,6 +163,8 @@ class Menubar extends EventEmitter {
     if (!this.window) {
       this._createWindow()
     }
+    
+    this.emit('show')
 
     if (!this.cachedBounds) {
       this.cachedBounds = this.tray.getBounds()
@@ -173,7 +176,7 @@ class Menubar extends EventEmitter {
 
     this.window.setPosition(pos.x, pos.y)
     this.window.show()
-    this.emit('show')
+    this.emit('after-show')
   }
 }
 
