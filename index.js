@@ -2,11 +2,15 @@ const path = require('path')
 const {EventEmitter} = require('events')
 const {app, Tray, BrowserWindow} = require('electron')
 const Positioner = require('electron-positioner')
+const merge = require('lodash.merge')
 
 const defaults = {
   dir: app.getAppPath(),
+  index: '',
   windowPosition: (process.platform === 'win32') ? 'trayBottomCenter' : 'trayCenter',
   showDockIcon: false,
+  showOnRightClick: false,
+  showOnAllWorkspaces: true,
   tooltip: '',
   window: {
     width: 400,
@@ -21,12 +25,10 @@ module.exports = class Menubar extends EventEmitter {
     super()
 
     if (typeof opts === 'string') {
-      opts = {
-        dir: opts
-      }
+      opts = { dir: opts }
     }
 
-    opts = Object.assign({}, defaults, opts)
+    opts = merge(defaults, opts)
 
     if (!path.isAbsolute(opts.dir)) {
       opts.dir = path.resolve(opts.dir)
@@ -37,29 +39,29 @@ module.exports = class Menubar extends EventEmitter {
     }
 
     this.opts = opts
+    this.ready = false
+    this.cachedBounds = null
 
-    if (app.isReady()) this._appReady()
-    else app.on('ready', this._appReady.bind(this))
+    if (app.isReady()) {
+      this._appReady()
+    } else {
+      app.on('ready', this._appReady.bind(this))
+    }
   }
 
   _appReady () {
-    if (app.dock && !this.opts.showDockIcon) app.dock.hide()
+    if (app.dock && !this.opts.showDockIcon) {
+      app.dock.hide()
+    }
 
-    var iconPath = this.opts.icon || path.join(this.opts.dir, 'IconTemplate.png')
-
-    this.cachedBounds = null
-    var defaultClickEvent = this.opts.showOnRightClick ? 'right-click' : 'click'
+    let iconPath = this.opts.icon || path.join(this.opts.dir, 'icon.png')
+    let defaultClickEvent = this.opts.showOnRightClick ? 'right-click' : 'click'
 
     this.tray = this.opts.tray || new Tray(iconPath)
     this.tray.on(defaultClickEvent, this._clicked.bind(this))
     this.tray.on('double-click', this._clicked.bind(this))
     this.tray.setToolTip(this.opts.tooltip)
-
-    this.supportsTrayHighlightState = false
-    try {
-      this.tray.setHighlightMode('never')
-      this.supportsTrayHighlightState = true
-    } catch (e) {}
+    this.tray.setHighlightMode('never')
 
     if (this.opts.preloadWindow) {
       this._createWindow()
@@ -103,7 +105,7 @@ module.exports = class Menubar extends EventEmitter {
   }
 
   hideWindow () {
-    if (this.supportsTrayHighlightState) this.tray.setHighlightMode('never')
+    this.tray.setHighlightMode('never')
     if (!this.window) return
     this.emit('hide')
     this.window.hide()
