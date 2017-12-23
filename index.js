@@ -5,8 +5,6 @@ const Positioner = require('electron-positioner')
 const merge = require('lodash.merge')
 
 const defaults = {
-  dir: app.getAppPath(),
-  index: '',
   windowPosition: (process.platform === 'win32') ? 'trayBottomCenter' : 'trayCenter',
   showDockIcon: false,
   showOnRightClick: false,
@@ -24,8 +22,8 @@ module.exports = class Menubar extends EventEmitter {
   constructor (opts) {
     super()
 
-    if (typeof opts === 'string') {
-      opts = { dir: opts }
+    if (typeof opts !== 'object') {
+      opts = {}
     }
 
     opts = merge(defaults, opts)
@@ -35,11 +33,11 @@ module.exports = class Menubar extends EventEmitter {
     }
 
     if (!opts.index) {
-      opts.index = `file://${path.join(opts.dir, 'index.html')}`
+      opts.index = `file://${path.join(app.getAppPath(), 'index.html')}`
     }
     
     if (!opts.icon) {
-      opts.icon = path.join(this.opts.dir, 'icon.png')
+      opts.icon = path.join(app.getAppPath(), 'icon.png')
     }
 
     this.opts = opts
@@ -73,11 +71,17 @@ module.exports = class Menubar extends EventEmitter {
     this.emit('ready')
   }
 
-  _clicked (e, bounds) {
-    if (e.altKey || e.shiftKey || e.ctrlKey || e.metaKey) return this.hideWindow()
-    if (this.window && this.window.isVisible()) return this.hideWindow()
+  _clicked (event, bounds) {
+    if (event.altKey || event.shiftKey || event.ctrlKey || event.metaKey) {
+      return this.hideWindow()
+    }
+
+    if (this.window && this.window.isVisible()) {
+      return this.hideWindow()
+    }
+
     this.cachedBounds = bounds || this.cachedBounds
-    this.showWindow(this.cachedBounds)
+    this.show()
   }
 
   _createWindow () {
@@ -90,7 +94,11 @@ module.exports = class Menubar extends EventEmitter {
       this.window.setVisibleOnAllWorkspaces(true)
     }
 
-    this.window.on('close', this.windowClear.bind(this))
+    this.window.on('close', () => {
+      delete this.window
+      this.emit('after-close')
+    })
+
     this.window.loadURL(this.opts.index)
     this.emit('after-create-window')
   }
@@ -111,23 +119,17 @@ module.exports = class Menubar extends EventEmitter {
     this.emit('after-hide')
   }
 
-  windowClear () {
-    delete this.window
-    this.emit('after-close')
-  }
-
-  showWindow (trayPos) {
+  show () {
     if (this.supportsTrayHighlightState) this.tray.setHighlightMode('always')
     if (!this.window) {
       this._createWindow()
     }
 
     this.emit('show')
+    
+    let trayPos
 
-    if (trayPos && trayPos.x !== 0) {
-      // Cache the bounds
-      this.cachedBounds = trayPos
-    } else if (this.cachedBounds) {
+    if (this.cachedBounds) {
       // Cached value will be used if showWindow is called without bounds data
       trayPos = this.cachedBounds
     } else if (this.tray.getBounds) {
