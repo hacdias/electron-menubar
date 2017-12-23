@@ -19,7 +19,10 @@ const defaults = {
   }
 }
 
-module.exports = class Menubar extends EventEmitter {
+/**
+ * Class Menubar.
+ */
+class Menubar extends EventEmitter {
   constructor (opts) {
     super()
 
@@ -44,6 +47,8 @@ module.exports = class Menubar extends EventEmitter {
     this.opts = opts
     this.ready = false
     this.cachedBounds = null
+    this.window = null
+    this.positioner = null
 
     if (app.isReady()) {
       this._appReady()
@@ -52,15 +57,18 @@ module.exports = class Menubar extends EventEmitter {
     }
   }
 
+  /**
+   * This sets up the tray. Must only be called once.
+   */
   _appReady () {
     if (app.dock && !this.opts.showDockIcon) {
       app.dock.hide()
     }
 
-    let defaultClickEvent = this.opts.showOnRightClick ? 'right-click' : 'click'
+    let clickEvent = this.opts.showOnRightClick ? 'right-click' : 'click'
 
     this.tray = new Tray(this.opts.icon)
-    this.tray.on(defaultClickEvent, this._clicked.bind(this))
+    this.tray.on(clickEvent, this._clicked.bind(this))
     this.tray.on('double-click', this._clicked.bind(this))
     this.tray.setToolTip(this.opts.tooltip)
     this.tray.setHighlightMode('never')
@@ -69,22 +77,13 @@ module.exports = class Menubar extends EventEmitter {
       this._createWindow()
     }
 
+    this.ready = true
     this.emit('ready')
   }
 
-  _clicked (event, bounds) {
-    if (event.altKey || event.shiftKey || event.ctrlKey || event.metaKey) {
-      return this.hide()
-    }
-
-    if (this.window && this.window.isVisible()) {
-      return this.hide()
-    }
-
-    this.cachedBounds = bounds || this.cachedBounds
-    this.show()
-  }
-
+  /**
+   * Creates the Window. Must only be called once.
+   */
   _createWindow () {
     this.emit('create-window')
 
@@ -96,65 +95,84 @@ module.exports = class Menubar extends EventEmitter {
     }
 
     this.window.on('close', () => {
-      delete this.window
-      this.emit('after-close')
+      this.window = null
     })
 
     this.window.on('blur', () => {
-      this.window.isAlwaysOnTop() ? this.emit('focus-lost') : this.hide()
+      if (!this.window.isAlwaysOnTop()) this.hide()
     })
 
     this.window.loadURL(this.opts.index)
     this.emit('after-create-window')
   }
 
-  setOption (opt, val) {
-    this.opts[opt] = val
+  /**
+   * Triggered when clicking the tray icon.
+   *
+   * @param {Event} event
+   * @param {Rectangle} bounds
+   */
+  _clicked (event, bounds) {
+    // Hide the window if clicking with ALT/SHIFT/CTRL or Meta keys.
+    if (event.altKey || event.shiftKey || event.ctrlKey || event.metaKey) {
+      return this.hide()
+    }
+
+    // If there is a window and it is already visible, hide it.
+    if (this.window && this.window.isVisible()) {
+      return this.hide()
+    }
+
+    this.cachedBounds = bounds || this.cachedBounds
+    this.show()
   }
 
-  getOption (opt) {
-    return this.opts[opt]
+  /**
+   * Informs if the Menubar is already ready.
+   */
+  isReady () {
+    return this.ready
   }
 
+  /**
+   * Hides the Window.
+   */
   hide () {
     this.tray.setHighlightMode('never')
     if (!this.window) return
     this.emit('hide')
     this.window.hide()
-    this.emit('after-hide')
   }
 
+  /**
+   * Shows the Window.
+   */
   show () {
-    if (this.supportsTrayHighlightState) this.tray.setHighlightMode('always')
     if (!this.window) {
       this._createWindow()
     }
 
-    this.emit('show')
+    this.tray.setHighlightMode('always')
 
-    let trayPos
-
-    if (this.cachedBounds) {
-      // Cached value will be used if showWindow is called without bounds data
-      trayPos = this.cachedBounds
-    } else if (this.tray.getBounds) {
-      // Get the current tray bounds
-      trayPos = this.tray.getBounds()
+    if (!this.cachedBounds) {
+      this.cachedBounds = this.tray.getBounds()
     }
 
-    // Default the window to the right if `trayPos` bounds are undefined or null.
-    var noBoundsPosition = null
-    if ((trayPos === undefined || trayPos.x === 0) && this.opts.windowPosition.substr(0, 4) === 'tray') {
-      noBoundsPosition = (process.platform === 'win32') ? 'bottomRight' : 'topRight'
+    // Tray bounds are not available on other platforms than Windows and macOS.
+    // TODO: calculate position by cursor click.
+    let noBoundsPosition = null
+    if (process.platform !== 'win32' && process.platform !== 'darwin') {
+      noBoundsPosition = 'topRight'
     }
 
-    var position = this.positioner.calculate(noBoundsPosition || this.opts.windowPosition, trayPos)
-
-    var x = (this.opts.x !== undefined) ? this.opts.x : position.x
-    var y = (this.opts.y !== undefined) ? this.opts.y : position.y
+    let position = this.positioner.calculate(noBoundsPosition || this.opts.windowPosition, this.cachedBounds)
+    let x = (this.opts.window.x !== undefined) ? this.opts.window.x : position.x
+    let y = (this.opts.window.y !== undefined) ? this.opts.window.y : position.y
 
     this.window.setPosition(x, y)
     this.window.show()
-    this.emit('after-show')
+    this.emit('show')
   }
 }
+
+module.exports = Menubar
