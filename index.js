@@ -100,6 +100,10 @@ module.exports = class Menubar extends EventEmitter {
       this.emit('after-close')
     })
 
+    this.window.on('blur', () => {
+      this.opts.window.alwaysOnTop ? this.emit('focus-lost') : this.hide()
+    })
+
     this.window.loadURL(this.opts.index)
     this.emit('after-create-window')
   }
