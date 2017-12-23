@@ -2,10 +2,12 @@ const path = require('path')
 const Positioner = require('electron-positioner')
 const merge = require('lodash.merge')
 const {EventEmitter} = require('events')
-const {app, Tray, BrowserWindow} = require('electron')
+const electron = require('electron')
+const {app, Tray, BrowserWindow} = electron
 
 const defaults = {
-  windowPosition: (process.platform === 'win32') ? 'trayBottomCenter' : 'trayCenter',
+  // TODO: WIndows: is the taskbar at the top or at the bottom?
+  windowPosition: (process.platform === 'win32') ? 'trayBottomRight' : 'trayCenter',
   preloadWindow: false,
   showDockIcon: false,
   showOnRightClick: false,
@@ -148,30 +150,59 @@ class Menubar extends EventEmitter {
    * Shows the Window.
    */
   show () {
+    this.tray.setHighlightMode('always')
     if (!this.window) {
       this._createWindow()
     }
-
-    this.tray.setHighlightMode('always')
 
     if (!this.cachedBounds) {
       this.cachedBounds = this.tray.getBounds()
     }
 
-    // Tray bounds are not available on other platforms than Windows and macOS.
-    // TODO: calculate position by cursor click.
-    let noBoundsPosition = null
     if (process.platform !== 'win32' && process.platform !== 'darwin') {
-      noBoundsPosition = 'topRight'
+      return this._setPositionAndShow(this._positionByCursor())
     }
 
-    let position = this.positioner.calculate(noBoundsPosition || this.opts.windowPosition, this.cachedBounds)
-    let x = (this.opts.window.x !== undefined) ? this.opts.window.x : position.x
-    let y = (this.opts.window.y !== undefined) ? this.opts.window.y : position.y
+    if (!this.cachedBounds) {
+      this.cachedBounds = this.tray.getBounds()
+    }
 
-    this.window.setPosition(x, y)
+    let position = this.positioner.calculate(this.opts.windowPosition, this.cachedBounds)
+    this._setPositionAndShow(position)
+  }
+
+  _setPositionAndShow (pos) {
+    pos.x = (this.opts.window.x !== undefined) ? this.opts.window.x : pos.x
+    pos.y = (this.opts.window.y !== undefined) ? this.opts.window.y : pos.y
+
+    this.window.setPosition(pos.x, pos.y)
     this.window.show()
     this.emit('show')
+  }
+
+  /**
+   * Get the Position by Cursor.
+   *
+   * @return {Point}
+   */
+  _positionByCursor () {
+    const screen = electron.screen
+    const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint())
+    const cursor = screen.getCursorScreenPoint()
+    const window = this.window.getBounds()
+
+    let x = cursor.x
+    let y = cursor.y
+
+    if (x + window.width > display.bounds.width) {
+      x -= window.width
+    }
+
+    if (y + window.height > display.bounds.height) {
+      y -= window.height
+    }
+
+    return { x, y }
   }
 }
 
