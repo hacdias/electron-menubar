@@ -72,12 +72,13 @@ function calculateYAlign (windowBounds, trayBounds, align) {
     case 'up':
       y = trayBounds.y + trayBounds.height - windowBounds.height
       break
+    case 'down':
+      y = trayBounds.y
+      break
     case 'center':
+    default:
       y = Math.round((trayBounds.y + (trayBounds.height / 2)) - (windowBounds.height / 2))
       break
-    case 'down':
-    default:
-      y = trayBounds.y
   }
 
   if (y + windowBounds.height > display.bounds.height && align !== 'up') {
