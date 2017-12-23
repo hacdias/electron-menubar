@@ -36,7 +36,7 @@ module.exports = class Menubar extends EventEmitter {
     if (!opts.index) {
       opts.index = `file://${path.join(app.getAppPath(), 'index.html')}`
     }
-    
+
     if (!opts.icon) {
       opts.icon = path.join(app.getAppPath(), 'icon.png')
     }
@@ -127,7 +127,7 @@ module.exports = class Menubar extends EventEmitter {
     }
 
     this.emit('show')
-    
+
     let trayPos
 
     if (this.cachedBounds) {

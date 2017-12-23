@@ -25,10 +25,14 @@
   "author": "Henrique Dias <hacdias@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "pre-commit": "^1.2.2",
     "standard": "^10.0.3"
   },
   "dependencies": {
     "electron-positioner": "^3.0.0",
     "lodash.merge": "^4.6.0"
-  }
+  },
+  "pre-commit": [
+    "lint"
+  ]
 }
