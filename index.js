@@ -101,7 +101,7 @@ module.exports = class Menubar extends EventEmitter {
     })
 
     this.window.on('blur', () => {
-      this.opts.window.alwaysOnTop ? this.emit('focus-lost') : this.hide()
+      this.window.isAlwaysOnTop() ? this.emit('focus-lost') : this.hide()
     })
 
     this.window.loadURL(this.opts.index)
