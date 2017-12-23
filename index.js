@@ -1,11 +1,12 @@
 const path = require('path')
-const {EventEmitter} = require('events')
-const {app, Tray, BrowserWindow} = require('electron')
 const Positioner = require('electron-positioner')
 const merge = require('lodash.merge')
+const {EventEmitter} = require('events')
+const {app, Tray, BrowserWindow} = require('electron')
 
 const defaults = {
   windowPosition: (process.platform === 'win32') ? 'trayBottomCenter' : 'trayCenter',
+  preloadWindow: false,
   showDockIcon: false,
   showOnRightClick: false,
   showOnAllWorkspaces: true,
@@ -58,7 +59,7 @@ module.exports = class Menubar extends EventEmitter {
 
     let defaultClickEvent = this.opts.showOnRightClick ? 'right-click' : 'click'
 
-    this.tray = this.opts.tray || new Tray(this.opts.icon)
+    this.tray = new Tray(this.opts.icon)
     this.tray.on(defaultClickEvent, this._clicked.bind(this))
     this.tray.on('double-click', this._clicked.bind(this))
     this.tray.setToolTip(this.opts.tooltip)
@@ -73,11 +74,11 @@ module.exports = class Menubar extends EventEmitter {
 
   _clicked (event, bounds) {
     if (event.altKey || event.shiftKey || event.ctrlKey || event.metaKey) {
-      return this.hideWindow()
+      return this.hide()
     }
 
     if (this.window && this.window.isVisible()) {
-      return this.hideWindow()
+      return this.hide()
     }
 
     this.cachedBounds = bounds || this.cachedBounds
@@ -111,7 +112,7 @@ module.exports = class Menubar extends EventEmitter {
     return this.opts[opt]
   }
 
-  hideWindow () {
+  hide () {
     this.tray.setHighlightMode('never')
     if (!this.window) return
     this.emit('hide')
