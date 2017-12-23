@@ -1,11 +1,31 @@
 const electron = require('electron')
 
 /**
+ * Get the display nearest the current cursor position
+ *
+ * @return {Display} - the display closest to the current cursor position
+ */
+function getDisplay () {
+  const screen = electron.screen
+  return screen.getDisplayNearestPoint(screen.getCursorScreenPoint())
+}
+
+/**
+ * Get cursor position
+ *
+ * @return {Point} - the position of the cursor
+ */
+function getCursorPosition () {
+  return electron.screen.getCursorScreenPoint()
+}
+
+/**
  * Calculates the x position of the tray window
  *
  * @param {Rectangle} windowBounds - electron BrowserWindow bounds of tray window to position
  * @param {Rectangle} trayBounds - tray bounds from electron Tray.getBounds()
  * @param {string} [align] - align left|center|right, default: center
+ *
  * @return {integer} - calculated x position
  */
 function calculateXAlign (windowBounds, trayBounds, align) {
@@ -41,6 +61,7 @@ function calculateXAlign (windowBounds, trayBounds, align) {
  * @param {Rectangle} windowBounds - electron BrowserWindow bounds
  * @param {Rectangle} trayBounds - tray bounds from electron Tray.getBounds()
  * @param {string} [align] - align up|middle|down, default: down
+ *
  * @return {integer} - calculated y position
  */
 function calculateYAlign (windowBounds, trayBounds, align) {
@@ -75,6 +96,7 @@ function calculateYAlign (windowBounds, trayBounds, align) {
  * @param {Rectangle} windowBounds - electron BrowserWindow bounds of tray window to position
  * @param {Eelectron.Display} display - display on which the cursor is currently
  * @param {Point} cursor - current cursor position
+ *
  * @return {Point} - Calculated point {x, y} where the window should be positioned
  */
 function calculateByCursorPosition (windowBounds, display, cursor) {
@@ -97,44 +119,6 @@ function calculateByCursorPosition (windowBounds, display, cursor) {
   }
 }
 
-function getScreen () {
-  return electron.screen
-}
-
-function getCursorPosition () {
-  const screen = getScreen()
-  return screen.getCursorScreenPoint()
-}
-
-/**
- * Get the display nearest the current cursor position
- *
- * @return {Electron.Display} - the display closest to the current cursor position
- */
-function getDisplay () {
-  const screen = getScreen()
-  return screen.getDisplayNearestPoint(screen.getCursorScreenPoint())
-}
-
-/**
- * Calculates the position of the tray window
- *
- * @return {string} - the position of the taskbar (top|right|bottom|left)
- */
-function getTaskbarPosition () {
-  const display = getDisplay()
-
-  if (display.workArea.y > 0) {
-    return 'top'
-  } else if (display.workArea.x > 0) {
-    return 'left'
-  } else if (display.workArea.width === display.bounds.width) {
-    return 'bottom'
-  }
-
-  return 'right'
-}
-
 class Positioner {
   /**
    * Calculates the position of the tray window
@@ -155,7 +139,7 @@ class Positioner {
     }
 
     const _alignment = alignment || {}
-    const taskbarPosition = getTaskbarPosition()
+    const taskbarPosition = this.getTaskbarPosition()
     const display = getDisplay()
     let x
     let y
@@ -195,11 +179,31 @@ class Positioner {
       default: center
    * @param {string} [alignment.y] - y align if tray bar is left or right (up|middle|down),
       default: down
+   *
    * @return {Void}
    */
   static position (window, trayBounds, alignment) {
     const position = this.calculate(window.getBounds(), trayBounds, alignment)
     window.setPosition(position.x, position.y, false)
+  }
+
+  /**
+   * Calculates the position of the tray window
+   *
+   * @return {string} - the position of the taskbar (top|right|bottom|left)
+   */
+  static getTaskbarPosition () {
+    const display = getDisplay()
+
+    if (display.workArea.y > 0) {
+      return 'top'
+    } else if (display.workArea.x > 0) {
+      return 'left'
+    } else if (display.workArea.width === display.bounds.width) {
+      return 'bottom'
+    }
+
+    return 'right'
   }
 }
 

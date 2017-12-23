@@ -167,42 +167,13 @@ class Menubar extends EventEmitter {
       this.cachedBounds = this.tray.getBounds()
     }
 
-    const pos = Positioner.calculate(this.window.getBounds(), this.cachedBounds)
-    this._setPositionAndShow(pos)
-  }
-
-  _setPositionAndShow (pos) {
+    let pos = Positioner.calculate(this.window.getBounds(), this.cachedBounds)
     pos.x = (this.opts.window.x !== undefined) ? this.opts.window.x : pos.x
     pos.y = (this.opts.window.y !== undefined) ? this.opts.window.y : pos.y
 
     this.window.setPosition(pos.x, pos.y)
     this.window.show()
     this.emit('show')
-  }
-
-  /**
-   * Get the Position by Cursor.
-   *
-   * @return {Point}
-   */
-  _positionByCursor () {
-    const screen = electron.screen
-    const display = screen.getDisplayNearestPoint(screen.getCursorScreenPoint())
-    const cursor = screen.getCursorScreenPoint()
-    const window = this.window.getBounds()
-
-    let x = cursor.x - (window.width / 2)
-    let y = cursor.y - (window.height / 2)
-
-    if (x + window.width > display.bounds.width) {
-      x = display.bounds.width - window.width
-    }
-
-    if (y + window.height > display.bounds.height) {
-      y = display.bounds.height - window.height
-    }
-
-    return { x, y }
   }
 }
 
