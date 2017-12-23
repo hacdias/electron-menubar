@@ -3,9 +3,31 @@
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hacdias/electron-menubar.git"
   },
-  "author": "",
-  "license": "ISC"
+  "scripts": {
+    "test": "standard",
+    "lint": "standard"
+  },
+  "keywords": [
+    "electron",
+    "atom",
+    "shell",
+    "menubar",
+    "menu",
+    "mac",
+    "windows",
+    "linux",
+    "app"
+  ],
+  "author": "Henrique Dias <hacdias@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "standard": "^10.0.3"
+  },
+  "dependencies": {
+    "electron-positioner": "^3.0.0"
+  }
 }
