@@ -32,10 +32,6 @@ class Menubar extends EventEmitter {
 
     opts = merge(defaults, opts)
 
-    if (!path.isAbsolute(opts.dir)) {
-      opts.dir = path.resolve(opts.dir)
-    }
-
     if (!opts.index) {
       opts.index = `file://${path.join(app.getAppPath(), 'index.html')}`
     }
