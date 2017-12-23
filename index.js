@@ -37,6 +37,10 @@ module.exports = class Menubar extends EventEmitter {
     if (!opts.index) {
       opts.index = `file://${path.join(opts.dir, 'index.html')}`
     }
+    
+    if (!opts.icon) {
+      opts.icon = path.join(this.opts.dir, 'icon.png')
+    }
 
     this.opts = opts
     this.ready = false
@@ -54,10 +58,9 @@ module.exports = class Menubar extends EventEmitter {
       app.dock.hide()
     }
 
-    let iconPath = this.opts.icon || path.join(this.opts.dir, 'icon.png')
     let defaultClickEvent = this.opts.showOnRightClick ? 'right-click' : 'click'
 
-    this.tray = this.opts.tray || new Tray(iconPath)
+    this.tray = this.opts.tray || new Tray(this.opts.icon)
     this.tray.on(defaultClickEvent, this._clicked.bind(this))
     this.tray.on('double-click', this._clicked.bind(this))
     this.tray.setToolTip(this.opts.tooltip)
@@ -82,10 +85,6 @@ module.exports = class Menubar extends EventEmitter {
 
     this.window = new BrowserWindow(this.opts.window)
     this.positioner = new Positioner(this.window)
-
-    this.window.on('blur', () => {
-      this.opts.alwaysOnTop ? this.emitBlur() : this.hideWindow()
-    })
 
     if (this.opts.showOnAllWorkspaces !== false) {
       this.window.setVisibleOnAllWorkspaces(true)
@@ -115,10 +114,6 @@ module.exports = class Menubar extends EventEmitter {
   windowClear () {
     delete this.window
     this.emit('after-close')
-  }
-
-  emitBlur () {
-    this.emit('focus-lost')
   }
 
   showWindow (trayPos) {
