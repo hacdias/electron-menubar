@@ -1,10 +1,15 @@
+# electron-menubar
+
+[![npm](https://img.shields.io/npm/v/electron-menubar.svg?style=flat-square)](https://www.npmjs.com/package/electron-menubar)
+[![Travis](https://img.shields.io/travis/hacdias/electron-menubar.svg?style=flat-square)](https://travis-ci.org/hacdias/electron-menubar)
+
 Based on [menubar module](https://github.com/maxogden/menubar) with improvements.
 
 TODO:
 
 - [ ] Fix position on linux (calculate by cursor position)
 
-## `new Menubar([options])`
+### `new Menubar([options])`
 
 - `options` Object (optional)
     - `icon` String. The tray's icon. Defaults to `app.getAppPath()/icon.png`.
