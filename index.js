@@ -81,7 +81,7 @@ module.exports = class Menubar extends EventEmitter {
     this.window = new BrowserWindow(this.opts.window)
     this.positioner = new Positioner(this.window)
 
-    this.window.on('blur', function () {
+    this.window.on('blur', () => {
       this.opts.alwaysOnTop ? this.emitBlur() : this.hideWindow()
     })
 
