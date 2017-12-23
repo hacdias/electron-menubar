@@ -1,7 +1,7 @@
 {
   "name": "electron-menubar",
-  "version": "0.0.12",
-  "description": "",
+  "version": "1.0.0",
+  "description": "Easy way to create an electron menubar application.",
   "main": "index.js",
   "repository": {
     "type": "git",
@@ -29,8 +29,6 @@
     "standard": "^10.0.3"
   },
   "dependencies": {
-    "electron-positioner": "^3.0.0",
-    "electron-traywindow-positioner": "0.0.1",
     "lodash.merge": "^4.6.0"
   },
   "pre-commit": [
