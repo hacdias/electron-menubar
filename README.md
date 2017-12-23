@@ -5,9 +5,7 @@
 
 Based on [menubar module](https://github.com/maxogden/menubar) with improvements.
 
-TODO:
-
-- [ ] Fix position on linux (calculate by cursor position)
+## WORK IN PROGRESS :) Will be concluded in some days :)
 
 ### `new Menubar([options])`
 
