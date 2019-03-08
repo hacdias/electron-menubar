@@ -194,13 +194,13 @@ class Positioner {
    * @return {string} - the position of the taskbar (top|right|bottom|left)
    */
   static getTaskbarPosition () {
-    const display = getDisplay()
+    const { bounds, workArea } = getDisplay()
 
-    if (display.workArea.y > 0) {
+    if (workArea.y > bounds.y) {
       return 'top'
-    } else if (display.workArea.x > 0) {
+    } else if (workArea.x > bounds.x) {
       return 'left'
-    } else if (display.workArea.width === display.bounds.width) {
+    } else if (workArea.width === bounds.width) {
       return 'bottom'
     }
 
