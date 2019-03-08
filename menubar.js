@@ -1,9 +1,9 @@
 const path = require('path')
 const Positioner = require('./positioner')
 const merge = require('lodash.merge')
-const {EventEmitter} = require('events')
+const { EventEmitter } = require('events')
 const electron = require('electron')
-const {app, Tray, BrowserWindow} = electron
+const { app, Tray, BrowserWindow } = electron
 
 const defaults = {
   preloadWindow: false,
