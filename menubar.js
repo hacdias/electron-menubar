@@ -62,7 +62,7 @@ class Menubar extends EventEmitter {
       app.dock.hide()
     }
 
-    let clickEvent = this.opts.showOnRightClick ? 'right-click' : 'click'
+    const clickEvent = this.opts.showOnRightClick ? 'right-click' : 'click'
 
     this.tray = new Tray(this.opts.icon)
     this.tray.on(clickEvent, this._clicked.bind(this))
@@ -166,7 +166,7 @@ class Menubar extends EventEmitter {
       this.cachedBounds = this.tray.getBounds()
     }
 
-    let pos = Positioner.calculate(this.window.getBounds(), this.cachedBounds)
+    const pos = Positioner.calculate(this.window.getBounds(), this.cachedBounds)
     pos.x = (this.opts.window.x !== undefined) ? this.opts.window.x : pos.x
     pos.y = (this.opts.window.y !== undefined) ? this.opts.window.y : pos.y
 
