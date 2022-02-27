@@ -1,5 +1,7 @@
 # electron-menubar
 
+> ⚠️ Package no longer maintained. Please [contact me](https://hacdias.com/contact) if you want to become its maintainer.
+
 [![npm](https://img.shields.io/npm/v/electron-menubar.svg?style=flat-square)](https://www.npmjs.com/package/electron-menubar)
 [![Travis](https://img.shields.io/travis/hacdias/electron-menubar.svg?style=flat-square)](https://travis-ci.org/hacdias/electron-menubar)
 
